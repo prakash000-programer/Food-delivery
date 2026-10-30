@@ -1,7 +1,7 @@
 
-package fooddelivery.cli;
+package com.fooddelivery.cli;
 
-import fooddelivery.models.Restaurant;
+import com.fooddelivery.models.Restaurant;
 import java.time.LocalTime;
 import java.util.Scanner;
 

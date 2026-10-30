@@ -1,7 +1,7 @@
 
-package fooddelivery.cli;
+package com.fooddelivery.cli;
 
-import fooddelivery.models.MenuItem;
+import com.fooddelivery.models.MenuItem;
 import java.util.Scanner;
 
 public class MenuItemCli {
