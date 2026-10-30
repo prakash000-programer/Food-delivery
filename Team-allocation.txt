@@ -1,0 +1,4 @@
+Akash : Coupon and Payment
+Dharanidaran: OrderItems and Cart
+Priyanka: Restaurent and menuItems
+Joel: Ratings and Delivery partner
