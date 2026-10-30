@@ -38,6 +38,9 @@ public class Cart {
         if (item == null || item.getItemId() == null || item.getItemId().trim().isEmpty()) {
             throw new IllegalArgumentException("A menu item with an ID is required.");
         }
+        if (!restaurantId.equals(item.getRestaurantId())) {
+            throw new IllegalArgumentException("Item does not belong to the selected restaurant.");
+        }
         if (!item.isAvailable()) {
             throw new IllegalStateException("Item is unavailable: " + item.getName());
         }
