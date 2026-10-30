@@ -1,78 +1,52 @@
+package com.fooddelivery.models;
 
-package fooddelivery.models;
-
-public class MenuItem {
-
-    // Attributes
-    private String itemId;
-    private String name;
+public final class MenuItem {
+    private final String itemId;
+    private final String restaurantId;
+    private final String name;
     private double price;
-    private String category;
+    private final String category;
     private boolean available;
 
-    // Constructor
-    public MenuItem(String itemId, String name,
-                    double price, String category) {
-
-        if (itemId == null || itemId.isBlank()
-                || name == null || name.isBlank()
-                || category == null || category.isBlank()
-                || price < 0) {
-            throw new IllegalArgumentException(
-                    "Invalid menu item details");
+    public MenuItem(String itemId, String restaurantId, String name, double price,
+                    String category, boolean available) {
+        requireText(itemId, "Item ID");
+        requireText(restaurantId, "Restaurant ID");
+        requireText(name, "Item name");
+        if (!"Veg".equals(category) && !"Non-Veg".equals(category)) {
+            throw new IllegalArgumentException("Category must be Veg or Non-Veg.");
         }
-
         this.itemId = itemId;
-        this.name = name;
-        this.price = price;
+        this.restaurantId = restaurantId;
+        this.name = name.trim();
         this.category = category;
-        this.available = true;
-    }
-
-    // Update Menu Item Price
-    public void updatePrice(double price) {
-
-        if (price < 0) {
-            throw new IllegalArgumentException(
-                    "Price cannot be negative");
-        }
-
-        this.price = price;
-    }
-
-    // Change Menu Item Availability
-    public void changeAvailability(boolean available) {
+        updatePrice(price);
         this.available = available;
     }
 
-    // Getters
-    public String getItemId() {
-        return itemId;
-    }
+    public String getItemId() { return itemId; }
+    public String getRestaurantId() { return restaurantId; }
+    public String getName() { return name; }
+    public double getPrice() { return price; }
+    public String getCategory() { return category; }
+    public boolean isAvailable() { return available; }
 
-    public String getName() {
-        return name;
+    public void updatePrice(double price) {
+        if (!Double.isFinite(price) || price <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero and finite.");
+        }
+        this.price = price;
     }
+    public void changeAvailability(boolean available) { this.available = available; }
 
-    public double getPrice() {
-        return price;
+    private static void requireText(String value, String field) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(field + " is required.");
+        }
     }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public boolean isAvailable() {
-        return available;
-    }
-
     @Override
     public String toString() {
-        return "\nItem ID: " + itemId
-                + "\nName: " + name
-                + "\nPrice: Rs." + price
-                + "\nCategory: " + category
-                + "\nAvailability: "
-                + (available ? "Available" : "Not Available");
+        return String.format("%s | %s | %s | Rs.%.2f | %s", itemId, name, category,
+                price, available ? "Available" : "Unavailable");
     }
 }

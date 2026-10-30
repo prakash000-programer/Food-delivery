@@ -1,146 +1,92 @@
-
-package fooddelivery.models;
+package com.fooddelivery.models;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-public class Restaurant {
-
-    // Attributes
-    private String restaurantId;
+public final class Restaurant {
+    private final String restaurantId;
+    private final String ownerId;
     private String name;
     private String cuisineType;
     private String city;
     private LocalTime openingTime;
     private LocalTime closingTime;
-    private double minimumOrderValue;
-    private boolean isOpen;
+    private final double minimumOrderValue;
+    private boolean open;
+    private boolean activated;
 
-    // One Restaurant contains multiple MenuItems
-    private List<MenuItem> menuItems;
-
-    // Constructor
-    public Restaurant(String restaurantId, String name,
-                       String cuisineType, String city,
-                       LocalTime openingTime,
-                       LocalTime closingTime,
-                       double minimumOrderValue) {
-
-        if (restaurantId == null || restaurantId.isBlank()
-                || name == null || name.isBlank()
-                || cuisineType == null || cuisineType.isBlank()
-                || city == null || city.isBlank()
-                || openingTime == null || closingTime == null
-                || minimumOrderValue < 0) {
-            throw new IllegalArgumentException(
-                    "Invalid restaurant details");
+    public Restaurant(String restaurantId, String ownerId, String name, String cuisineType,
+                      String city, LocalTime openingTime, LocalTime closingTime, double minimumOrderValue) {
+        requireText(restaurantId, "Restaurant ID");
+        requireText(ownerId, "Owner ID");
+        if (!Double.isFinite(minimumOrderValue) || minimumOrderValue < 0) {
+            throw new IllegalArgumentException("Minimum order value must be finite and non-negative.");
         }
-
         this.restaurantId = restaurantId;
-        this.name = name;
-        this.cuisineType = cuisineType;
-        this.city = city;
-        this.openingTime = openingTime;
-        this.closingTime = closingTime;
-        this.minimumOrderValue = minimumOrderValue;
-        this.isOpen = true;
-
-        this.menuItems = new ArrayList<>();
-    }
-
-    // Update Restaurant Details
-    public void updateDetails(String name, String cuisineType,
-                              String city, LocalTime openingTime,
-                              LocalTime closingTime,
-                              double minimumOrderValue) {
-
-        if (name == null || name.isBlank()
-                || cuisineType == null || cuisineType.isBlank()
-                || city == null || city.isBlank()
-                || openingTime == null || closingTime == null
-                || minimumOrderValue < 0) {
-            throw new IllegalArgumentException(
-                    "Invalid restaurant details");
-        }
-
-        this.name = name;
-        this.cuisineType = cuisineType;
-        this.city = city;
-        this.openingTime = openingTime;
-        this.closingTime = closingTime;
+        this.ownerId = ownerId;
+        updateDetails(name, cuisineType, city);
+        updateTimings(openingTime, closingTime);
         this.minimumOrderValue = minimumOrderValue;
     }
 
-    // Change Restaurant Availability
-    public void changeAvailability(boolean isOpen) {
-        this.isOpen = isOpen;
-    }
+    public String getRestaurantId() { return restaurantId; }
+    public String getOwnerId() { return ownerId; }
+    public String getName() { return name; }
+    public String getCuisineType() { return cuisineType; }
+    public String getCity() { return city; }
+    public LocalTime getOpeningTime() { return openingTime; }
+    public LocalTime getClosingTime() { return closingTime; }
+    public double getMinimumOrderValue() { return minimumOrderValue; }
+    public boolean isOpen() { return open; }
+    public boolean isActivated() { return activated; }
 
-    // Add Menu Item
-    public void addMenuItem(MenuItem menuItem) {
-
-        if (menuItem == null) {
-            throw new IllegalArgumentException(
-                    "Menu item cannot be null");
+    public void updateDetails(String name, String cuisineType, String city) {
+        if (activated) {
+            throw new IllegalStateException("Name, cuisine and city cannot change after activation.");
         }
-
-        menuItems.add(menuItem);
+        requireText(name, "Name");
+        requireText(city, "City");
+        if (!Arrays.asList("North Indian", "South Indian", "Chinese", "Italian", "Fast Food").contains(cuisineType)) {
+            throw new IllegalArgumentException("Cuisine must be North Indian, South Indian, Chinese, Italian or Fast Food.");
+        }
+        this.name = name.trim();
+        this.cuisineType = cuisineType;
+        this.city = city.trim();
     }
 
-    // Remove Menu Item
-    public void removeMenuItem(String itemId) {
-
-        menuItems.removeIf(
-                item -> item.getItemId().equals(itemId));
+    public void updateTimings(LocalTime openingTime, LocalTime closingTime) {
+        if (openingTime == null || closingTime == null || openingTime.equals(closingTime)) {
+            throw new IllegalArgumentException("Opening and closing times must be present and different.");
+        }
+        this.openingTime = openingTime;
+        this.closingTime = closingTime;
     }
-
-    // Getters
-    public String getRestaurantId() {
-        return restaurantId;
+    public void activate() { activated = true; }
+    public void changeAvailability(boolean open) {
+        if (open && !activated) {
+            throw new IllegalStateException("Activate the restaurant before marking it open.");
+        }
+        this.open = open;
     }
-
-    public String getName() {
-        return name;
+    public boolean canAcceptOrders() { return canAcceptOrders(LocalTime.now()); }
+    public boolean canAcceptOrders(LocalTime time) {
+        if (time == null) { throw new IllegalArgumentException("Time is required."); }
+        if (!activated || !open) { return false; }
+        if (openingTime.isBefore(closingTime)) {
+            return !time.isBefore(openingTime) && time.isBefore(closingTime);
+        }
+        // An overnight opening window, for example 22:00 to 03:00.
+        return !time.isBefore(openingTime) || time.isBefore(closingTime);
     }
-
-    public String getCuisineType() {
-        return cuisineType;
+    private static void requireText(String value, String field) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(field + " is required.");
+        }
     }
-
-    public String getCity() {
-        return city;
-    }
-
-    public LocalTime getOpeningTime() {
-        return openingTime;
-    }
-
-    public LocalTime getClosingTime() {
-        return closingTime;
-    }
-
-    public double getMinimumOrderValue() {
-        return minimumOrderValue;
-    }
-
-    public boolean isOpen() {
-        return isOpen;
-    }
-
-    public List<MenuItem> getMenuItems() {
-        return new ArrayList<>(menuItems);
-    }
-
     @Override
     public String toString() {
-        return "\nRestaurant ID: " + restaurantId
-                + "\nName: " + name
-                + "\nCuisine Type: " + cuisineType
-                + "\nCity: " + city
-                + "\nOpening Time: " + openingTime
-                + "\nClosing Time: " + closingTime
-                + "\nMinimum Order Value: Rs." + minimumOrderValue
-                + "\nStatus: " + (isOpen ? "Open" : "Closed");
+        return String.format("%s | %s | %s | %s | %s-%s | Min Rs.%.2f | %s | %s",
+                restaurantId, name, cuisineType, city, openingTime, closingTime, minimumOrderValue,
+                activated ? "Activated" : "Draft", open ? "Marked open" : "Marked closed");
     }
 }
