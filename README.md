@@ -76,7 +76,7 @@ src/
 | :--- | :--- |
 | **Prakash** | User Management, Order Lifecycle & Core Integration |
 | **Akash** | Coupons, Discount Calculations & Payment Strategies |
-| **Dharanidaran** | Cart Operations & OrderItems |
+| **Dharani Dharran** | Cart Operations & OrderItems |
 | **Priyanka** | Restaurants, Operating Windows & Menu Items |
 | **Joel** | Delivery Partners & Rating/Review System |
 
